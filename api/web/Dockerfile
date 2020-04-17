@@ -15,4 +15,3 @@ COPY ./app.py /app
 
 #RUN apt-get clean
 #RUN apt-get install python-pyramid -y
-
