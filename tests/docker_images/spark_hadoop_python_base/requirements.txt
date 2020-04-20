@@ -1,0 +1,10 @@
+boto3
+numpy
+psycopg2-binary==2.8.4
+pandas
+pyspark==2.4.1
+sqlalchemy
+pytest==5.3.2
+pytest-helper==0.2.2
+pytest-helpers-namespace==2019.1.8
+pytest-cov==2.8.1

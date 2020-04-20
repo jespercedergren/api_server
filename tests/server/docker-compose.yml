@@ -1,0 +1,73 @@
+version: '3.2'
+
+services:
+ logstash:
+   build: ./logstash
+   volumes:
+   - type: bind
+     source: ./logstash/pipeline
+     target: /usr/share/logstash/pipeline
+   - type: bind
+     source: ./logstash/config/pipelines.yml
+     target: /usr/share/logstash/config/pipelines.yml
+   ports:
+    - "8081:8081"
+    - "8082:8082"
+    - "8083:8083"
+   networks:
+    - api_default
+
+ mongo:
+  image: mongo
+  environment:
+    - MONGO_INITDB_ROOT_USERNAME=test
+    - MONGO_INITDB_ROOT_PASSWORD=test
+  ports:
+    - "27017:27017"
+    - "27018:27018"
+    - "27019:27019"
+  networks:
+    - api_default
+
+ localstack:
+    image: localstack/localstack
+    environment:
+      - SERVICES=firehose, iam, s3, secretsmanager
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_ACCESS_KEY_ID=test
+      - DEFAULT_REGION=eu-west-1
+    ports:
+        - "4566:4566"
+        - "4572:4572"
+#       - "4573:4573"
+#       - "4593:4593"
+#       - "4584:4584"
+    networks:
+      - api_default
+
+ minio:
+    image: minio/minio
+    ports:
+            - '9000:9000'
+    volumes:
+            - ./data/.minio/data:/export
+            - ./data/.minio/config:/root/.minio
+    environment:
+            - MINIO_ACCESS_KEY=testtest
+            - MINIO_SECRET_KEY=testtest
+    command: server /export
+    networks:
+      - api_default
+
+
+networks:
+  api_default:
+    external: true
+
+
+# ADD docker tests
+# refactor secretsmanager to be generic
+# how to get clients to be part of? or good as it is?
+
+
+

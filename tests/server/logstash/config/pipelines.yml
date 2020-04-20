@@ -1,0 +1,6 @@
+- pipeline.id: api_mongo
+  path.config: "/usr/share/logstash/pipeline/logstash_api_mongo.conf"
+- pipeline.id: mongo
+  path.config: "/usr/share/logstash/pipeline/logstash_mongo.conf"
+- pipeline.id: s3
+  path.config: "/usr/share/logstash/pipeline/logstash_s3.conf"

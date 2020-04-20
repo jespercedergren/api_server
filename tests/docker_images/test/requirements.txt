@@ -1,0 +1,4 @@
+pymongo
+aiohttp
+requests
+git+git://github.com/jespercedergren/clients@master#egg=clients
