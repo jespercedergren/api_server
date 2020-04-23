@@ -1,8 +1,9 @@
 from flask import Flask, request, jsonify
 from clients.firehose import FirehoseClient
 from clients.mongo import MongoDBClient
-from clients.s3 import S3Client
+from clients.s3 import S3Client, S3ParquetClient
 from clients.s3 import get_firehose_output_s3_key
+from clients.dynamodb import DynamoDBClient
 
 app = Flask(__name__)
 
@@ -42,12 +43,11 @@ def ingest_bytes_json_smoke_test():
     return jsonify({'Data ingested': f'{response}'})
 
 
-@app.route('/api/read_data', methods=['GET', 'POST'])
-def read_data():
+@app.route('/api/read_data/s3', methods=['GET', 'POST'])
+def read_data_s3():
     """
     :return: json
     """
-    from clients.s3 import S3ParquetClient
 
     if request.method == 'POST':
         id_key = request.args.get("id_key")
@@ -67,6 +67,36 @@ def read_data():
         id_key = request.args.get("id_key")
         s3_parquet_client = S3ParquetClient()
         response = s3_parquet_client.read(path=f"s3://test-bucket/aggregated/mobile_data.parquet/id_key={id_key}")
+        return response
+
+    else:
+        return {"ERROR": f"Bad request method: {request.method}"}
+
+
+@app.route('/api/read_data/ddb', methods=['GET', 'POST'])
+def read_data():
+    """
+    :return: json
+    """
+
+    if request.method == 'POST':
+        user_id = request.args.get("user_id")
+        password = request.args.get("password")
+
+        # authenticate
+        # TODO
+
+        # read
+        dynamodb_client = DynamoDBClient(table_name="user_table")
+        response = dynamodb_client.get_item({"user_id": user_id})
+        return response
+
+    elif request.method == 'GET':
+
+        user_id = request.args.get("user_id")
+        # read
+        dynamodb_client = DynamoDBClient(table_name="user_table")
+        response = dynamodb_client.get_item({"user_id": user_id})
         return response
 
     else:

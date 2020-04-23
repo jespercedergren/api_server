@@ -2,7 +2,7 @@ import boto3
 import json
 from tests.server.setup.mongo import MongoDBSetup
 from clients.mongo import get_client_arg_from_secrets
-from tests.config import localstack_config, minio_config, mongo_config
+from tests.config import localstack_config, minio_config, dynamodb_config, mongo_config
 
 
 def setup_secrets_localstack():
@@ -73,6 +73,11 @@ def setup_firehose_delivery_stream_localstack():
                     "ExtendedS3DestinationConfiguration": extended_s3_destination_config}
 
     firehose_client.create_delivery_stream(**stream_setup)
+
+
+def setup_table_dynamodb():
+    dynamodb_client = boto3.client("dynamodb", **dynamodb_config["client"])
+    dynamodb_client.create_table(**dynamodb_config["table"])
 
 
 def setup_s3_bucket_minio():

@@ -2,4 +2,4 @@ flask
 gunicorn>=19.7.1
 boto3
 pymongo
-git+git://github.com/jespercedergren/clients@master#egg=clients
+git+git://github.com/jespercedergren/clients@dynamodb#egg=clients

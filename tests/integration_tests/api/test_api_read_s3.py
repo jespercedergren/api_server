@@ -33,7 +33,7 @@ class TestAPIReadS3:
         # POST
         # get data via API
         with requests.session() as session:
-            response = session.get(f"http://{server_service}:80/api/read_data",
+            response = session.get(f"http://{server_service}:80/api/read_data/s3",
                                     params={"id_key": 1, "password": "fake_password"})
         data = response.json()
         data_pd = pd.DataFrame(data)[cols]
@@ -49,7 +49,7 @@ class TestAPIReadS3:
         # GET
         # get data via API
         with requests.session() as session:
-            response = session.get(f"http://{server_service}:80/api/read_data",
+            response = session.get(f"http://{server_service}:80/api/read_data/s3",
                                    params={"id_key": 1})
         data = response.json()
         data_pd = pd.DataFrame(data)[cols]

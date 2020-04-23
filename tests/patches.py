@@ -2,7 +2,8 @@ from clients.postgres import PostgresClient
 from clients.mongo import MongoDBClient
 from clients.firehose import FirehoseClient
 from clients.s3 import S3Client, S3ParquetClient
-from tests.config import endpoint_url_localstack, endpoint_url_minio, host_mongo, host_postgres
+from clients.dynamodb import DynamoDBClient
+from tests.config import endpoint_url_localstack, endpoint_url_minio, endpoint_url_dynamodb, host_mongo, host_postgres
 
 
 class WrongDatabase(Exception):
@@ -66,6 +67,26 @@ class PatchedS3ParquetClient(S3ParquetClient):
             "region_name": "eu-west-1",
             "aws_access_key_id": "testtest",
             "aws_secret_access_key": "testtest"
+        }
+
+        self.secrets = secrets
+
+
+class PatchedDynamoDBClient(DynamoDBClient):
+    """
+    Class that patches the DynamoDBClient for testing.
+    The _set_secrets method is overridden and sets the secrets with a set of fixed credentials.
+    These credentials match the ones specified in conftest.py.
+    """
+    def __init__(self):
+        super(PatchedDynamoDBClient, self).__init__(table_name="user_table")
+
+    def _set_secrets(self):
+        secrets = {
+            "endpoint_url": endpoint_url_dynamodb,
+            "region_name": "eu-west-1",
+            "aws_access_key_id": "test",
+            "aws_secret_access_key": "test"
         }
 
         self.secrets = secrets

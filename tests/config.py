@@ -5,6 +5,7 @@ if test_env == "docker":
     endpoint_url_minio = "http://minio:9000"
     endpoint_url_localstack = "http://localstack:4566"
     endpoint_url_localstack_spark_s3 = "http://localstack:4572"
+    endpoint_url_dynamodb = "http://dynamodb:8000"
     host_postgres = "postgres"
     host_mongo = "mongo"
     server_service = "server"
@@ -15,6 +16,7 @@ elif test_env == "local" or test_env == "circle":
     endpoint_url_minio = "http://127.0.0.1:9000"
     endpoint_url_localstack = "http://localhost:4566"
     endpoint_url_localstack_spark_s3 = "http://127.0.0.1:4572"
+    endpoint_url_dynamodb = "http://localhost:8001"
     host_postgres = "localhost"
     host_mongo = "localhost"
     server_service = "0.0.0.0"
@@ -39,7 +41,9 @@ secrets = {"firehose_client": {"endpoint_url": "http://localstack:4566", "region
                      "aws_access_key_id": credential, "aws_secret_access_key": credential},
            "mongo_client": {"host": "mongo", "user": "test", "password": "test", "port": "27017"},
            "s3_client": {"endpoint_url": "http://minio:9000", "region_name": region_name,
-                     "aws_access_key_id": credential_minio, "aws_secret_access_key": credential_minio}
+                     "aws_access_key_id": credential_minio, "aws_secret_access_key": credential_minio},
+           "dynamodb_client": {"endpoint_url": "http://dynamodb:8000", "region_name": region_name,
+                     "aws_access_key_id": credential, "aws_secret_access_key": credential}
            }
 
 #role_arn = "arn:aws:iam::000000000000:role/super_role"
@@ -68,6 +72,18 @@ localstack_config = {
                        "aws_access_key_id": credential,
                        "aws_secret_access_key": credential},
     "secrets": secrets
+}
+
+dynamodb_config = {
+    "client": {"endpoint_url": endpoint_url_dynamodb,
+               "region_name": region_name,
+                "aws_access_key_id": credential,
+               "aws_secret_access_key": credential},
+    "table": {"AttributeDefinitions": [{"AttributeName": "user_id", "AttributeType": "S"}],
+              "TableName": "user_table",
+              "KeySchema": [{"AttributeName": "user_id", "KeyType": "HASH"}],
+              "ProvisionedThroughput": {'ReadCapacityUnits': 10, 'WriteCapacityUnits': 10}
+}
 }
 
 postgres_config = \

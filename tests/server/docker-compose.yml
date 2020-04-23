@@ -59,6 +59,13 @@ services:
     networks:
       - api_default
 
+ dynamodb:
+    image: amazon/dynamodb-local
+    ports:
+        - "8001:8000"
+    command: ["-jar", "DynamoDBLocal.jar"]
+    networks:
+      - api_default
 
 networks:
   api_default:

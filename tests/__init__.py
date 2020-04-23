@@ -6,5 +6,5 @@ try:
 except KeyError as e:
 	test_env = 'local'
 	import subprocess
-	subprocess.call(["pip", "install", "-r", f"{project_dir}/requirements.txt"])
+	subprocess.call(["pip", "install", "-r", f"{project_dir}/requirements.txt", "--upgrade"])
 

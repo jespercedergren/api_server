@@ -13,6 +13,9 @@ echo "localstack:4566 is open"
 ./wait_for_it.sh localhost:9000 -t 0
 echo "minio:9000 is open"
 
+./wait_for_it.sh localhost:8000 -t 0
+echo "dynamodb:8000 is open"
+
 ./wait_for_it.sh localhost:27017 -t 0
 echo "mongo:27017 is open"
 
