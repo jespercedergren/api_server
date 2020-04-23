@@ -3,7 +3,8 @@ This is a lightweight Flask API that accepts post requests on:
 - ```<host_ip>:80/api/ingest_data/mongo```
 - ```<host_ip>:80/api/ingest_data/firehose```
 - ```<host_ip>:80/api/ingest_data/smoke_test``` (testing only)
-- ```<host_ip>:80/api/read_data``` (POST/GET)
+- ```<host_ip>:80/api/read_data/s3``` (POST/GET)
+- ```<host_ip>:80/api/read_data/ddb``` (POST/GET)
  
 A Nginx HTTPS reverse proxy is used as an intermediary proxy service which takes a client request, 
 passes it on to the Flask web server, and subsequently delivers the web server’s response back to the client.
