@@ -1,7 +1,8 @@
-import pytest
-import time
 import os
 import subprocess
+import time
+
+import pytest
 
 from tests.config import server_service
 from tests.helpers.common import get_all_s3_keys, read_s3_stream
@@ -16,7 +17,9 @@ class TestAPIS3:
         start = time.perf_counter()
         # run as python script
         project_dir = os.path.dirname(os.path.abspath(__file__))
-        subprocess.Popen(["python3.7", f"{project_dir}/../../helpers/async_populate.py", "--url", url])
+        subprocess.Popen(
+            ["python3.7", f"{project_dir}/../../helpers/async_populate.py", "--url", url]
+        )
 
         return start
 
@@ -42,6 +45,7 @@ class TestAPIS3:
 
         # test data list is as expected
         from tests.helpers.async_populate import payloads as expected_data_list
+
         assert sum([x in expected_data_list for x in data_list]) == 100
         assert sum([x in data_list for x in expected_data_list]) == 100
 

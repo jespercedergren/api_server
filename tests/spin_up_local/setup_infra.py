@@ -1,8 +1,10 @@
-import boto3
 import json
-from tests.server.setup.mongo import MongoDBSetup
+
+import boto3
 from clients.mongo import get_client_arg_from_secrets
-from tests.config import localstack_config, minio_config, dynamodb_config, mongo_config
+
+from tests.config import dynamodb_config, localstack_config, minio_config, mongo_config
+from tests.server.setup.mongo import MongoDBSetup
 
 
 def setup_secrets_localstack():
@@ -17,8 +19,6 @@ def setup_secrets_localstack():
     except sm.exceptions.ResourceExistsException:
         print(f"Secret {secret_name} already exists...")
         pass
-
-    yield sm
 
 
 def setup_s3_bucket_localstack():
@@ -49,30 +49,21 @@ def setup_firehose_delivery_stream_localstack():
     s3_destination_configuration = {"RoleARN": role_arn, "BucketARN": bucket_arn, "Prefix": prefix}
 
     extended_s3_destination_config = {
-        'RoleARN': role_arn,
-        'BucketARN': bucket_arn,
-        'DataFormatConversionConfiguration': {
-            'InputFormatConfiguration': {
-                'Deserializer': {
-                    'HiveJsonSerDe': {
-                    }
-                }
-            },
-            'OutputFormatConfiguration': {
-                'Serializer': {
-                    'ParquetSerDe': {
-                    }
-                }
-            },
-            'SchemaConfiguration': {
-            },
-            'Enabled': True
-        }
+        "RoleARN": role_arn,
+        "BucketARN": bucket_arn,
+        "DataFormatConversionConfiguration": {
+            "InputFormatConfiguration": {"Deserializer": {"HiveJsonSerDe": {}}},
+            "OutputFormatConfiguration": {"Serializer": {"ParquetSerDe": {}}},
+            "SchemaConfiguration": {},
+            "Enabled": True,
+        },
     }
 
-    stream_setup = {"DeliveryStreamName": delivery_stream_name,
-                    "S3DestinationConfiguration": s3_destination_configuration,
-                    "ExtendedS3DestinationConfiguration": extended_s3_destination_config}
+    stream_setup = {
+        "DeliveryStreamName": delivery_stream_name,
+        "S3DestinationConfiguration": s3_destination_configuration,
+        "ExtendedS3DestinationConfiguration": extended_s3_destination_config,
+    }
 
     firehose_client.create_delivery_stream(**stream_setup)
 

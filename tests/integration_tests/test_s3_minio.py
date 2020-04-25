@@ -1,8 +1,11 @@
-import pytest
 import time
+
+import pytest
+
 from tests.helpers.io import save_parquet
 
-#@pytest.mark.skip(reason="Skipping.")
+
+# @pytest.mark.skip(reason="Skipping.")
 class TestS3Minio:
     @pytest.fixture(scope="session")
     def add_data(self, setup_s3_bucket_minio, spark_session_minio):
@@ -11,6 +14,7 @@ class TestS3Minio:
         start = time.perf_counter()
 
         import pandas as pd
+
         pd_df = pd.DataFrame([[1, 2], [3, 4]], columns=["a", "b"])
         df = spark.createDataFrame(pd_df)
 
@@ -28,4 +32,3 @@ class TestS3Minio:
         elapsed = time.perf_counter() - start
         print(f"Executed in {elapsed:0.2f} seconds.")
         assert True
-

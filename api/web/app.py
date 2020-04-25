@@ -1,4 +1,5 @@
-from flask import Flask, request, jsonify
+from flask import Flask, jsonify, request
+
 from clients.firehose import FirehoseClient
 from clients.mongo import MongoDBClient
 from clients.s3 import S3Client, S3ParquetClient
@@ -10,18 +11,18 @@ app = Flask(__name__)
 # Assuming environment is set here
 
 # POST
-@app.route('/api/ingest_data/mongo', methods=['POST'])
+@app.route("/api/ingest_data/mongo", methods=["POST"])
 def ingest_json_mongo():
     """
     :return: json
     """
     data_json = request.json
-    mongo_client = MongoDBClient(database='test', collection='test')
+    mongo_client = MongoDBClient(database="test", collection="test")
     object_id_1 = mongo_client.save(data_json)
-    return jsonify({'Data ingested': f'{object_id_1}'})
+    return jsonify({"Data ingested": f"{object_id_1}"})
 
 
-@app.route('/api/ingest_data/firehose', methods=['POST'])
+@app.route("/api/ingest_data/firehose", methods=["POST"])
 def ingest_bytes_json_firehose():
     """
     :return: json
@@ -29,7 +30,7 @@ def ingest_bytes_json_firehose():
     data_bytes = request.data
     firehose_client = FirehoseClient(delivery_stream_name="api_to_s3_ingest")
     response = firehose_client.put_record(record=data_bytes)
-    return jsonify({'Data ingested': f'{response}'})
+    return jsonify({"Data ingested": f"{response}"})
 
 
 @app.route('/api/ingest_data/smoke_test', methods=['POST'])
@@ -104,5 +105,5 @@ def read_data():
 
 
 # running web web in local machine
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5001)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5001)

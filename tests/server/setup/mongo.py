@@ -18,4 +18,3 @@ class MongoDBSetup:
             remove_dbs = [x for x in dbs if x not in primary_dbs]
             for db in remove_dbs:
                 mongo.connection.drop_database(db)
-
