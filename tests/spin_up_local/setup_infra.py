@@ -18,6 +18,8 @@ def setup_secrets_localstack():
         print(f"Secret {secret_name} already exists...")
         pass
 
+    yield sm
+
 
 def setup_s3_bucket_localstack():
 
@@ -117,4 +119,5 @@ if __name__ == "__main__":
     setup_s3_bucket_localstack()
     setup_s3_bucket_minio()
     setup_firehose_delivery_stream_localstack()
+    setup_table_dynamodb()
     clean_mongo_database(mongo_db_setup())

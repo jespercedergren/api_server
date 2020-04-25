@@ -23,6 +23,7 @@ class TestAPIReadS3:
 
         return start, input_data_pd
 
+    @pytest.mark.skip(reason="Not implemented.")
     def test_post_api_read_s3(self, add_data):
 
         start = add_data[0]
@@ -40,6 +41,7 @@ class TestAPIReadS3:
         # test
         assert pd_equals(expected_data_pd, data_pd)
 
+    #@pytest.mark.skip(reason="Not implemented.")
     def test_get_api_read_s3(self, add_data):
         start = add_data[0]
         expected_data_pd = add_data[1]
@@ -48,10 +50,14 @@ class TestAPIReadS3:
 
         # GET
         # get data via API
-        with requests.session() as session:
-            response = session.get(f"http://{server_service}:80/api/read_data/s3",
-                                   params={"id_key": 1})
+        s = time.perf_counter()
+        for i in range(10):
+            with requests.session() as session:
+                response = session.get(f"http://{server_service}:80/api/read_data/s3",
+                                       params={"id_key": 1})
         data = response.json()
+        elapsed = time.perf_counter() - s
+        print(f"{__file__} executed in {elapsed:0.2f} seconds.")
         data_pd = pd.DataFrame(data)[cols]
 
         # test

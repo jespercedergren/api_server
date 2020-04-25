@@ -61,3 +61,21 @@ class TestAPIReadDynamoDB:
         # test
         assert expected_data == data
         assert expected_data_2 == data_2
+
+    def test_get_api_read_ddb_multi(self, add_data):
+
+        expected_data = add_data[1]
+
+        responses = []
+        s = time.perf_counter()
+        for i in range(100):
+            with requests.session() as session:
+                response = session.get(f"http://{server_service}:80/api/read_data/ddb",
+                                       params={"user_id": "111"})
+                responses.append(response)
+
+        elapsed = time.perf_counter() - s
+        print(f"{__file__} executed in {elapsed:0.2f} seconds.")
+        data = [resp.json() for resp in responses]
+
+        assert sum([x == expected_data for x in data]) == len(data)

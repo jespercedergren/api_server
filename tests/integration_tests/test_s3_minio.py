@@ -22,7 +22,6 @@ class TestS3Minio:
         start = add_data
         spark = spark_session_minio
 
-        import time
         df = spark.read.parquet("s3://test-bucket/test.parquet")
         df.show()
 
