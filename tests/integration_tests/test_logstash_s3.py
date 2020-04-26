@@ -1,7 +1,9 @@
-import pytest
-import time
 import os
 import subprocess
+import time
+
+import pytest
+
 from tests.config import logstash_service
 
 
@@ -14,8 +16,10 @@ class TestLogstashS3:
 
         start = time.perf_counter()
         project_dir = os.path.dirname(os.path.abspath(__file__))
-        subprocess.Popen(["python3.7", f"{project_dir}/../../helpers/async_populate.py", "--url", url])
-        #subprocess.Popen(["python3.7", f"{project_dir}/async_populate.py", "--url", url])
+        subprocess.Popen(
+            ["python3.7", f"{project_dir}/../../helpers/async_populate.py", "--url", url]
+        )
+        # subprocess.Popen(["python3.7", f"{project_dir}/async_populate.py", "--url", url])
 
         return start
 
@@ -23,7 +27,7 @@ class TestLogstashS3:
         start = add_data
         spark = spark_session_minio
 
-        #df = spark.read.parquet("s3://test-bucket")
+        # df = spark.read.parquet("s3://test-bucket")
 
         elapsed = time.perf_counter() - start
         print(f"Executed in {elapsed:0.2f} seconds.")

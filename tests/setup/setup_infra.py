@@ -4,7 +4,7 @@ import boto3
 from clients.mongo import get_client_arg_from_secrets
 
 from tests.config import dynamodb_config, localstack_config, minio_config, mongo_config
-from tests.server.setup.mongo import MongoDBSetup
+from tests.setup.mongo import MongoDBSetup
 
 
 def setup_secrets_localstack():
@@ -69,8 +69,11 @@ def setup_firehose_delivery_stream_localstack():
 
 
 def setup_table_dynamodb():
-    dynamodb_client = boto3.client("dynamodb", **dynamodb_config["client"])
-    dynamodb_client.create_table(**dynamodb_config["table"])
+    try:
+        dynamodb_client = boto3.client("dynamodb", **dynamodb_config["client"])
+        dynamodb_client.create_table(**dynamodb_config["table"])
+    except dynamodb_client.exceptions.ResourceInUseException as e:
+        print(f"DynamoDB table {dynamodb_config['table']['TableName']} already exists...")
 
 
 def setup_s3_bucket_minio():

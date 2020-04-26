@@ -1,15 +1,24 @@
-import pytest
-import os
-import boto3
 import json
-from pyspark.sql import SparkSession
-from tests.config import minio_config, localstack_config, dynamodb_config, mongo_config, postgres_config
-from tests.server.setup.postgres import PostgresSetup
-from tests.server.setup.mongo import MongoDBSetup
+import os
+
+import boto3
+import pytest
 from clients.mongo import get_client_arg_from_secrets
+from pyspark.sql import SparkSession
+
+from tests.config import (
+    dynamodb_config,
+    localstack_config,
+    minio_config,
+    mongo_config,
+    postgres_config,
+)
+from tests.helpers.infra import cleanup_buckets, cleanup_delivery_streams, cleanup_secrets
+from tests.setup.mongo import MongoDBSetup
+from tests.setup.postgres import PostgresSetup
 
 
-@pytest.fixture(scope='session', autouse=True)
+@pytest.fixture(scope="session", autouse=True)
 def set_environment():
     pass
 
@@ -28,15 +37,15 @@ def setup_secrets_localstack():
 
     yield sm
 
-    for secret in sm.list_secrets()["SecretList"]:
-        secret_id = secret["Name"]
-        sm.delete_secret(SecretId=secret_id, ForceDeleteWithoutRecovery=True)
+    cleanup_secrets(sm)
 
 
 @pytest.fixture(scope="function")
 def setup_s3_bucket_localstack():
 
     s3_resource = boto3.resource("s3", **localstack_config["s3"])
+
+    cleanup_buckets(s3_resource)
 
     for bucket_name in localstack_config["s3_buckets"]:
         try:
@@ -47,13 +56,7 @@ def setup_s3_bucket_localstack():
 
     yield s3_resource
 
-    for bucket in s3_resource.buckets.all():
-        for key in bucket.objects.iterator():
-            try:
-                key.delete()
-            except s3_resource.exceptions.NoSuchBucket:
-                print(f"Bucket {bucket} does not exist...")
-        bucket.delete()
+    cleanup_buckets(s3_resource)
 
 
 @pytest.fixture(scope="module")
@@ -61,8 +64,10 @@ def spark_session_localstack():
     """
     Set up a spark session with all the settings.
     """
-    os.environ["PYSPARK_SUBMIT_ARGS"] = '--packages "org.apache.hadoop:hadoop-aws:2.7.3" pyspark-shell'
-    #os.environ["PYSPARK_SUBMIT_ARGS"] = '--packages "io.delta:delta-core_2.11:0.5.0" pyspark-shell'
+    os.environ[
+        "PYSPARK_SUBMIT_ARGS"
+    ] = '--packages "org.apache.hadoop:hadoop-aws:2.7.3" pyspark-shell'
+    # os.environ["PYSPARK_SUBMIT_ARGS"] = '--packages "io.delta:delta-core_2.11:0.5.0" pyspark-shell'
     spark = SparkSession.builder.getOrCreate()
 
     # Setup spark to use s3, and point it to the moto server.
@@ -70,13 +75,15 @@ def spark_session_localstack():
     hadoop_conf.set("fs.s3.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
     hadoop_conf.set("fs.s3a.access.key", localstack_config["spark"]["fs.s3a.access.key"])
     hadoop_conf.set("fs.s3a.secret.key", localstack_config["spark"]["fs.s3a.secret.key"])
-    hadoop_conf.set("fs.s3a.endpoint", localstack_config["spark"]["fs.s3a.endpoint"]) #127.0.0.1:4572 works
-    hadoop_conf.set('fs.s3a.path.style.access', 'true')
+    hadoop_conf.set(
+        "fs.s3a.endpoint", localstack_config["spark"]["fs.s3a.endpoint"]
+    )  # 127.0.0.1:4572 works
+    hadoop_conf.set("fs.s3a.path.style.access", "true")
     hadoop_conf.set("spark.sql.parquet.binaryAsString", "true'")
     spark.conf.set("spark.driver.maxResultSize", "5g")
 
     yield spark
-    print('Delete Spark session...')
+    print("Delete Spark session...")
     spark.stop()
     del spark
 
@@ -94,42 +101,34 @@ def setup_firehose_delivery_stream_localstack():
     s3_destination_configuration = {"RoleARN": role_arn, "BucketARN": bucket_arn, "Prefix": prefix}
 
     extended_s3_destination_config = {
-        'RoleARN': role_arn,
-        'BucketARN': bucket_arn,
-        'DataFormatConversionConfiguration': {
-            'InputFormatConfiguration': {
-                'Deserializer': {
-                    'HiveJsonSerDe': {
-                    }
-                }
-            },
-            'OutputFormatConfiguration': {
-                'Serializer': {
-                    'ParquetSerDe': {
-                    }
-                }
-            },
-            'SchemaConfiguration': {
-            },
-            'Enabled': True
-        }
+        "RoleARN": role_arn,
+        "BucketARN": bucket_arn,
+        "DataFormatConversionConfiguration": {
+            "InputFormatConfiguration": {"Deserializer": {"HiveJsonSerDe": {}}},
+            "OutputFormatConfiguration": {"Serializer": {"ParquetSerDe": {}}},
+            "SchemaConfiguration": {},
+            "Enabled": True,
+        },
     }
 
-    stream_setup = {"DeliveryStreamName": delivery_stream_name,
-                    "S3DestinationConfiguration": s3_destination_configuration,
-                    "ExtendedS3DestinationConfiguration": extended_s3_destination_config}
+    stream_setup = {
+        "DeliveryStreamName": delivery_stream_name,
+        "S3DestinationConfiguration": s3_destination_configuration,
+        "ExtendedS3DestinationConfiguration": extended_s3_destination_config,
+    }
 
     firehose_client.create_delivery_stream(**stream_setup)
     yield firehose_client
 
-    for delivery_stream_name in firehose_client.list_delivery_streams()["DeliveryStreamNames"]:
-        firehose_client.delete_delivery_stream(DeliveryStreamName=delivery_stream_name)
+    cleanup_delivery_streams(firehose_client)
 
 
 @pytest.fixture(scope="session")
 def setup_s3_bucket_minio():
 
     s3_resource = boto3.resource("s3", **minio_config["s3"])
+
+    cleanup_buckets(s3_resource)
 
     for bucket_name in minio_config["s3_buckets"]:
         try:
@@ -139,13 +138,8 @@ def setup_s3_bucket_minio():
 
     yield s3_resource
 
-    for bucket in s3_resource.buckets.all():
-        for key in bucket.objects.iterator():
-            try:
-                key.delete()
-            except s3_resource.exceptions.NoSuchBucket:
-                print(f"Bucket does not exist...")
-        bucket.delete()
+    cleanup_buckets(s3_resource)
+
 
 @pytest.fixture(scope="session")
 def setup_table_dynamodb():
@@ -158,15 +152,18 @@ def setup_table_dynamodb():
 
     yield dynamodb_client
 
-    dynamodb_client.delete_table(TableName=dynamodb_config['table']['TableName'])
+    dynamodb_client.delete_table(TableName=dynamodb_config["table"]["TableName"])
+
 
 @pytest.fixture(scope="session")
 def spark_session_minio():
     """
     Set up a spark session with all the settings.
     """
-    os.environ["PYSPARK_SUBMIT_ARGS"] = '--packages "org.apache.hadoop:hadoop-aws:2.7.3" pyspark-shell'
-    #os.environ["PYSPARK_SUBMIT_ARGS"] = '--packages "io.delta:delta-core_2.11:0.5.0" pyspark-shell'
+    os.environ[
+        "PYSPARK_SUBMIT_ARGS"
+    ] = '--packages "org.apache.hadoop:hadoop-aws:2.7.3" pyspark-shell'
+    # os.environ["PYSPARK_SUBMIT_ARGS"] = '--packages "io.delta:delta-core_2.11:0.5.0" pyspark-shell'
     spark = SparkSession.builder.getOrCreate()
 
     print(spark)
@@ -176,16 +173,16 @@ def spark_session_minio():
     hadoop_conf.set("fs.s3a.access.key", minio_config["spark"]["fs.s3a.access.key"])
     hadoop_conf.set("fs.s3a.secret.key", minio_config["spark"]["fs.s3a.secret.key"])
     hadoop_conf.set("fs.s3a.endpoint", minio_config["spark"]["fs.s3a.endpoint"])
-    hadoop_conf.set('fs.s3a.path.style.access', 'true')
+    hadoop_conf.set("fs.s3a.path.style.access", "true")
     hadoop_conf.set("spark.sql.parquet.binaryAsString", "true'")
     spark.conf.set("spark.driver.maxResultSize", "5g")
 
-    hadoop_conf.set("spark.shuffle.service.enabled",  "true")
+    hadoop_conf.set("spark.shuffle.service.enabled", "true")
     hadoop_conf.set("fs.s3a.fast.upload", "true")
-    #hadoop_conf.set("spark.sql.parquet.cacheMetadata", "true")
+    # hadoop_conf.set("spark.sql.parquet.cacheMetadata", "true")
 
     yield spark
-    print('Delete Spark session...')
+    print("Delete Spark session...")
     spark.stop()
     del spark
 

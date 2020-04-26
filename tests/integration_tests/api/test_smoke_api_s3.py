@@ -41,15 +41,19 @@ class TestAPIS3:
                     data_json = read_s3_stream("test-bucket", key, s3_host="minio")
                     data_list.append(data_json)
 
-        print(data_json)
-
         # test data list is as expected
         from tests.helpers.async_populate import payloads as expected_data_list
+
+        #        if sum([x in expected_data_list for x in data_list]) != 100:
+        #            print("NOT EQUALS HUNDRED")
+        #            print("EXPECTED")
+        #            print(expected_data_list)
+        #            print("REALISED")
+        #            print(len(data_list))
+        #            print(data_list)
 
         assert sum([x in expected_data_list for x in data_list]) == 100
         assert sum([x in data_list for x in expected_data_list]) == 100
 
         elapsed = time.perf_counter() - start
         print(f"Executed in {elapsed:0.2f} seconds.")
-
-        assert len(bucket_keys["test-bucket"]) == 100
