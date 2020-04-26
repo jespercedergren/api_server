@@ -45,7 +45,7 @@ If no changes are made to the images this is only required once.
 
 Run tests (spins up and down required docker services.)
 
-```make run_tests_clean [test]=<optional_test_name>```
+```make run_tests_clean [test_name]=<optional_test_name>```
 
 
 For local or ad hoc testing all services can be spun up and configured using the following steps: 
@@ -60,7 +60,7 @@ For local or ad hoc testing all services can be spun up and configured using the
 
 2. Local tests can be run with
 
-```make run_tests [test]=<optional_test_name>```
+```make run_tests [test_name]=<optional_test_name>```
 
 Running test container ad hoc with a specified command can be done by: 
 
