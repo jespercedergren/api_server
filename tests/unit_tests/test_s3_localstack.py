@@ -23,7 +23,7 @@ class TestS3Localstack:
 
     def test_read_from_s3(self, add_data, spark_session_localstack):
         start = add_data[0]
-        expected_data = add_data[0]
+        expected_data = add_data[1]
         spark = spark_session_localstack
 
         df = spark.read.parquet("s3://test-bucket/test.parquet")
