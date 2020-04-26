@@ -2,10 +2,15 @@ import pytest
 import os
 import boto3
 import json
+import logging
 from pyspark.sql import SparkSession
+
 from tests.config import minio_config, localstack_config, dynamodb_config, mongo_config, postgres_config
-from tests.server.setup.postgres import PostgresSetup
-from tests.server.setup.mongo import MongoDBSetup
+from tests.setup.postgres import PostgresSetup
+from tests.setup.mongo import MongoDBSetup
+from tests.helpers.infra import cleanup_buckets
+from tests.helpers.infra import cleanup_secrets
+from tests.helpers.infra import cleanup_delivery_streams
 from clients.mongo import get_client_arg_from_secrets
 
 
@@ -23,14 +28,12 @@ def setup_secrets_localstack():
         try:
             sm.create_secret(Name=secret_name, SecretString=json.dumps(secret_dict))
         except sm.exceptions.ResourceExistsException:
-            print(f"Secret {secret_name} already exists...")
+            logging.info(f"Secret {secret_name} already exists...")
             pass
 
     yield sm
 
-    for secret in sm.list_secrets()["SecretList"]:
-        secret_id = secret["Name"]
-        sm.delete_secret(SecretId=secret_id, ForceDeleteWithoutRecovery=True)
+    cleanup_secrets(sm)
 
 
 @pytest.fixture(scope="function")
@@ -38,23 +41,18 @@ def setup_s3_bucket_localstack():
 
     s3_resource = boto3.resource("s3", **localstack_config["s3"])
 
+    cleanup_buckets(s3_resource)
+
     for bucket_name in localstack_config["s3_buckets"]:
         try:
             s3_resource.create_bucket(Bucket=bucket_name)
         except s3_resource.exceptions.ResourceExistsException:
-            print(f"Bucket {bucket_name} already exists...")
+            logging.info(f"Bucket {bucket_name} already exists...")
             pass
 
     yield s3_resource
 
-    for bucket in s3_resource.buckets.all():
-        for key in bucket.objects.iterator():
-            try:
-                key.delete()
-            except s3_resource.exceptions.NoSuchBucket:
-                print(f"Bucket {bucket} does not exist...")
-        bucket.delete()
-
+    cleanup_buckets(s3_resource)
 
 @pytest.fixture(scope="module")
 def spark_session_localstack():
@@ -76,7 +74,7 @@ def spark_session_localstack():
     spark.conf.set("spark.driver.maxResultSize", "5g")
 
     yield spark
-    print('Delete Spark session...')
+    logging.info('Delete Spark session...')
     spark.stop()
     del spark
 
@@ -122,8 +120,7 @@ def setup_firehose_delivery_stream_localstack():
     firehose_client.create_delivery_stream(**stream_setup)
     yield firehose_client
 
-    for delivery_stream_name in firehose_client.list_delivery_streams()["DeliveryStreamNames"]:
-        firehose_client.delete_delivery_stream(DeliveryStreamName=delivery_stream_name)
+    cleanup_delivery_streams(firehose_client)
 
 
 @pytest.fixture(scope="session")
@@ -131,21 +128,18 @@ def setup_s3_bucket_minio():
 
     s3_resource = boto3.resource("s3", **minio_config["s3"])
 
+    cleanup_buckets(s3_resource)
+
     for bucket_name in minio_config["s3_buckets"]:
         try:
             s3_resource.create_bucket(Bucket=bucket_name)
         except s3_resource.meta.client.exceptions.BucketAlreadyOwnedByYou:
-            print(f"Bucket {bucket_name} already exists...")
+            loggin.info(f"Bucket {bucket_name} already exists...")
 
     yield s3_resource
 
-    for bucket in s3_resource.buckets.all():
-        for key in bucket.objects.iterator():
-            try:
-                key.delete()
-            except s3_resource.exceptions.NoSuchBucket:
-                print(f"Bucket does not exist...")
-        bucket.delete()
+    cleanup_buckets(s3_resource)
+
 
 @pytest.fixture(scope="session")
 def setup_table_dynamodb():
@@ -154,7 +148,7 @@ def setup_table_dynamodb():
         dynamodb_client = boto3.client("dynamodb", **dynamodb_config["client"])
         dynamodb_client.create_table(**dynamodb_config["table"])
     except dynamodb_client.exceptions.ResourceInUseException as e:
-        print(f"DynamoDB table {dynamodb_config['table']['TableName']} already exists...")
+        loggin.info(f"DynamoDB table {dynamodb_config['table']['TableName']} already exists...")
 
     yield dynamodb_client
 
@@ -169,7 +163,6 @@ def spark_session_minio():
     #os.environ["PYSPARK_SUBMIT_ARGS"] = '--packages "io.delta:delta-core_2.11:0.5.0" pyspark-shell'
     spark = SparkSession.builder.getOrCreate()
 
-    print(spark)
     # Setup spark to use s3, and point it to the moto server.
     hadoop_conf = spark.sparkContext._jsc.hadoopConfiguration()
     hadoop_conf.set("fs.s3.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
@@ -182,10 +175,9 @@ def spark_session_minio():
 
     hadoop_conf.set("spark.shuffle.service.enabled",  "true")
     hadoop_conf.set("fs.s3a.fast.upload", "true")
-    #hadoop_conf.set("spark.sql.parquet.cacheMetadata", "true")
 
     yield spark
-    print('Delete Spark session...')
+    logging.info('Delete Spark session...')
     spark.stop()
     del spark
 

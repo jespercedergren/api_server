@@ -13,10 +13,10 @@ This enables tests to communicate with the mocked services from within our outsi
 It also enables the necessary infrastructure within the mocked services to be set up and torn down as defined in
 conftest.py.
 
-The tests run using asyncio to asynchronously send json data to a specified url.
+The API tests run using asyncio to asynchronously send json data to a specified url.
 
 ### Mocked services
-The server with the mocked services are spun up using docker compose in the server folder.
+The server with the mocked services are spun up using docker compose in ```tools/docker/server```.
 The services are attached to the same docker network as the api ```api_default```.
 Localstack are used to mock the AWS services, where all services used are available on port ```4566```.
 When reading from localstack s3 using Spark is set to use port ```4573```.
@@ -27,14 +27,41 @@ Logstash is used for experimental purposes and is configured to send json conten
 listening on ports ```8081``` and ```8083``` respectively.
 
 ### Running tests
-The tests can be run using pytest which requires all services to be spun up.
-All services can be spun up with ```spin_up_local/spin_up.sh```.
-The infrastructure can be set up manually with ```spin_up_local/setup_infra.sh```.
+For tests in docker the test image in ```tools/docker/docker_images``` needs to be built.
+The tests can be run using pytest which requires all services to be spun up. 
+The docker test containers connects to the network ```api_default```.
 
-For tests in docker the test image in ```docker_images``` needs to be built.
+All necessary config for the tests are set in ```config.py```.
 
-It can also be run by running the shell script ```run_all_tests.sh``` in ```docker_tests```
-which spins up and tears down the services automatically.
+The infrastructure for the tests are setup using calling the fixtures defined in ```conftest.py```.
+The infra can be manually set up with ```setup/setup_infra.py```.
 
-The docker tests connects the test container built in ```docker_images``` to the network ```api_default```.
-It also bind mounts the whole ```test```  and ```client``` folders into the container.
+
+### Steps for testing
+1. Build API images, and test images with Python, Spark and Hadoop.
+If no changes are made to the images this is only required once.
+
+```make build_all```
+
+Run tests (spins up and down required docker services.)
+
+```make run_tests_clean [test_name]=<optional_test_name>```
+
+
+For local or ad hoc testing all services can be spun up and configured using the following steps: 
+
+1. Spin up all services. 
+
+```make spin_up```
+
+(Optional) - Setup infra for ad hoc testing (local tests will setup infra dynamically).
+
+```make setup_infra```
+
+2. Local tests can be run with
+
+```make run_tests [test_name]=<optional_test_name>```
+
+Running test container ad hoc with a specified command can be done by: 
+
+```make test_container [container_argument]=<container_argument>```

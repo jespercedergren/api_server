@@ -6,6 +6,7 @@ import pytest
 
 from tests.config import server_service
 from tests.helpers.common import get_all_s3_keys, read_s3_stream
+from tests.constants import PYTHON
 
 
 class TestAPIS3:
@@ -18,7 +19,7 @@ class TestAPIS3:
         # run as python script
         project_dir = os.path.dirname(os.path.abspath(__file__))
         subprocess.Popen(
-            ["python3.7", f"{project_dir}/../../helpers/async_populate.py", "--url", url]
+            [PYTHON, f"{project_dir}/../../helpers/async_populate.py", "--url", url]
         )
 
         return start
@@ -41,8 +42,6 @@ class TestAPIS3:
                     data_json = read_s3_stream("test-bucket", key, s3_host="minio")
                     data_list.append(data_json)
 
-        print(data_json)
-
         # test data list is as expected
         from tests.helpers.async_populate import payloads as expected_data_list
 
@@ -51,5 +50,3 @@ class TestAPIS3:
 
         elapsed = time.perf_counter() - start
         print(f"Executed in {elapsed:0.2f} seconds.")
-
-        assert len(bucket_keys["test-bucket"]) == 100

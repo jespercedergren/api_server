@@ -23,8 +23,6 @@ The variable ENVIRONMENT should be set when testing.
 The set value of ```test_docker``` implies that the environment is a testing environment within docker, i.e when testing
 the API service in docker.
 
-It should be noted that the ```clients``` module is bind mounted into the web service so it can be used in the API.
 
 # TODO
- - Separate/make ```clients``` installable.
  - Terraform for infra in testing and production.
