@@ -64,4 +64,4 @@ For local or ad hoc testing all services can be spun up and configured using the
 
 Running test container ad hoc with a specified command can be done by: 
 
-```make test_container [command]=<command>```
+```make test_container [container_argument]=<container_argument>```

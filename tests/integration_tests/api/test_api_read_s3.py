@@ -9,7 +9,6 @@ from tests.helpers.common import pd_equals
 from tests.helpers.io import save_parquet
 
 
-# TODO fix and unskip tests
 class TestAPIReadS3:
     @pytest.fixture(scope="session")
     def add_data(self, setup_secrets_localstack, setup_s3_bucket_minio, spark_session_minio):

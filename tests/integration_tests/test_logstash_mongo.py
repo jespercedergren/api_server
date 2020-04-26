@@ -1,14 +1,12 @@
-import os
-import subprocess
-import time
-
-import pytest
-
-from tests.config import logstash_service
 from tests.patches import PatchedMongoDBClient
+import pytest
+import subprocess
+import os
+import time
+from tests.config import logstash_service
+from tests.constants import PYTHON
 
 
-# @pytest.mark.skip(reason="Not implemented.")
 class TestLogstashMongo:
     @pytest.fixture()
     def add_data(self, clean_mongo_database):
@@ -21,7 +19,7 @@ class TestLogstashMongo:
 
         start = time.perf_counter()
         project_dir = os.path.dirname(os.path.abspath(__file__))
-        subprocess.Popen(["python3.7", f"{project_dir}/../helpers/async_populate.py", "--url", url])
+        subprocess.Popen([PYTHON, f"{project_dir}/../helpers/async_populate.py", "--url", url])
 
         return start, mongo_client
 

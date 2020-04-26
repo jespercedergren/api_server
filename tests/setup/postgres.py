@@ -1,6 +1,6 @@
 import psycopg2
-
 from tests.setup import project_dir
+from tests.constants import POSTGRES_DATABASE_SETUP_FILE_PATH
 
 
 class WrongDataBase(Exception):
@@ -13,7 +13,6 @@ class PostgresSetup:
     the database according to the setup sql script passed in the setup_tables method.
     This class could be used to setup any database.
     """
-
     def __init__(self, **kwargs):
         self.conn = None
         self.db_credentials = kwargs
@@ -31,7 +30,7 @@ class PostgresSetup:
         self.connect(**self.db_credentials)
 
     def setup_tables(self):
-        input_file = project_dir + "/scripts/POSTGRES_DATABASE_SETUP.sql"
+        input_file = project_dir + POSTGRES_DATABASE_SETUP_FILE_PATH
         with self.conn.cursor() as cur:
             with open(input_file) as f:
                 sql = f.read()

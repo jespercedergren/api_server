@@ -4,6 +4,7 @@ import subprocess
 import time
 import os
 from tests.config import server_service
+from tests.constants import PYTHON
 
 
 class TestAPIMongo:
@@ -18,8 +19,7 @@ class TestAPIMongo:
 
         start = time.perf_counter()
         project_dir = os.path.dirname(os.path.abspath(__file__))
-        subprocess.Popen(["python3.7", f"{project_dir}/../../helpers/async_populate.py", "--url", url])
-        #subprocess.Popen(["python3.7", f"{project_dir}/async_populate.py", "--url", url])
+        subprocess.Popen([PYTHON, f"{project_dir}/../../helpers/async_populate.py", "--url", url])
 
         return start, mongo_client
 

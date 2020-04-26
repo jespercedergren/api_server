@@ -4,6 +4,7 @@ import os
 import subprocess
 from tests.config import server_service
 from tests.helpers.common import get_all_s3_keys, read_s3_stream
+from tests.constants import PYTHON
 
 
 class TestAPIFirehose:
@@ -15,7 +16,7 @@ class TestAPIFirehose:
         start = time.perf_counter()
         # run as python script
         project_dir = os.path.dirname(os.path.abspath(__file__))
-        subprocess.Popen(["python3.7", f"{project_dir}/../../helpers/async_populate.py", "--url", url])
+        subprocess.Popen([PYTHON, f"{project_dir}/../../helpers/async_populate.py", "--url", url])
 
         return start
 

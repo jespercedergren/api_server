@@ -1,4 +1,3 @@
-#FROM spark_hadoop_python_base AS test_base
 FROM python_spark_hadoop_base AS test_base
 
 RUN apt-get update && apt-get install -y git
