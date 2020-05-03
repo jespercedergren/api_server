@@ -1,5 +1,5 @@
 #FROM python:stretch
-FROM spark_hadoop_python_base
+FROM python_spark_hadoop_base
 
 WORKDIR /app
 

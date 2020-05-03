@@ -134,7 +134,7 @@ def setup_s3_bucket_minio():
         try:
             s3_resource.create_bucket(Bucket=bucket_name)
         except s3_resource.meta.client.exceptions.BucketAlreadyOwnedByYou:
-            loggin.info(f"Bucket {bucket_name} already exists...")
+            logging.info(f"Bucket {bucket_name} already exists...")
 
     yield s3_resource
 
@@ -148,7 +148,7 @@ def setup_table_dynamodb():
         dynamodb_client = boto3.client("dynamodb", **dynamodb_config["client"])
         dynamodb_client.create_table(**dynamodb_config["table"])
     except dynamodb_client.exceptions.ResourceInUseException as e:
-        loggin.info(f"DynamoDB table {dynamodb_config['table']['TableName']} already exists...")
+        logging.info(f"DynamoDB table {dynamodb_config['table']['TableName']} already exists...")
 
     yield dynamodb_client
 
