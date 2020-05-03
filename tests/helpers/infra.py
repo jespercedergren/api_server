@@ -1,7 +1,4 @@
 import boto3
-#from mypy_boto3 import s3
-#from mypy_boto3 import secretsmanager
-#from mypy_boto3 import firehose
 import mypy_boto3_s3 as s3
 import mypy_boto3_firehose as firehose
 import mypy_boto3_secretsmanager as secretsmanager
