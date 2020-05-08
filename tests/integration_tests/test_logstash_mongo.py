@@ -7,6 +7,7 @@ from tests.config import logstash_service
 from tests.constants import PYTHON
 
 
+@pytest.mark.skip(reason="Not implemented.")
 class TestLogstashMongo:
     @pytest.fixture()
     def add_data(self, clean_mongo_database):
