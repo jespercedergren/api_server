@@ -1,5 +1,4 @@
-#FROM python:stretch
-FROM python_spark_hadoop_base
+FROM python_base
 
 WORKDIR /app
 
@@ -12,6 +11,3 @@ ADD ./requirements.txt /srv/requirements.txt
 RUN pip install -r /srv/requirements.txt
 
 COPY ./app.py /app
-
-#RUN apt-get clean
-#RUN apt-get install python-pyramid -y
