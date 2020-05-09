@@ -1,7 +1,7 @@
 FROM nginx:1.11.3
 
 RUN rm /etc/nginx/nginx.conf
-COPY nginx.conf /etc/nginx/
+COPY api/server/nginx.conf /etc/nginx/
 
 RUN rm /etc/nginx/conf.d/default.conf
-COPY api.conf /etc/nginx/conf.d/
+COPY api/server/api.conf /etc/nginx/conf.d/

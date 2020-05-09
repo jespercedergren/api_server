@@ -1,10 +1,15 @@
-FROM python_base as python_spark_hadoop_base
+FROM docker_python_base
+
+COPY Pipfile Pipfile.lock /
 
 # JAVA
 RUN apt-get update \
  && apt-get install -y openjdk-8-jre \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
+
+# GIT
+RUN apt-get install --yes git
 
 # HADOOP
 ENV HADOOP_VERSION 2.8.0
@@ -31,5 +36,5 @@ RUN curl -sL --retry 3 \
  && mv /usr/$SPARK_PACKAGE $SPARK_HOME \
  && chown -R root:root $SPARK_HOME
 
-COPY requirements.txt .
-RUN pip install -r requirements.txt
+RUN pip install pipenv
+RUN pipenv sync --dev --python 3.7

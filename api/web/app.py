@@ -1,12 +1,11 @@
-from flask import Flask, jsonify, request
-
+from clients.dynamodb import DynamoDBClient
 from clients.firehose import FirehoseClient
 from clients.mongo import MongoDBClient
-from clients.s3 import S3Client, S3ParquetClient
-from clients.s3 import get_firehose_output_s3_key
-from clients.dynamodb import DynamoDBClient
+from clients.s3 import S3Client, S3ParquetClient, get_firehose_output_s3_key
+from flask import Flask, jsonify, request
 
 app = Flask(__name__)
+
 
 # Assuming environment is set here
 
@@ -33,24 +32,26 @@ def ingest_bytes_json_firehose():
     return jsonify({"Data ingested": f"{response}"})
 
 
-@app.route('/api/ingest_data/smoke_test', methods=['POST'])
+@app.route("/api/ingest_data/smoke_test", methods=["POST"])
 def ingest_bytes_json_smoke_test():
     """
     :return: json
     """
     data_bytes = request.data
     s3_client = S3Client(bucket="test-bucket")
-    response = s3_client.upload_record(record=data_bytes, get_key_func=get_firehose_output_s3_key, prefix="test-prefix")
-    return jsonify({'Data ingested': f'{response}'})
+    response = s3_client.upload_record(
+        record=data_bytes, get_key_func=get_firehose_output_s3_key, prefix="test-prefix"
+    )
+    return jsonify({"Data ingested": f"{response}"})
 
 
-@app.route('/api/read_data/s3', methods=['GET', 'POST'])
+@app.route("/api/read_data/s3", methods=["GET", "POST"])
 def read_data_s3():
     """
     :return: json
     """
 
-    if request.method == 'POST':
+    if request.method == "POST":
         id_key = request.args.get("id_key")
         password = request.args.get("password")
 
@@ -59,28 +60,32 @@ def read_data_s3():
 
         # read
         s3_parquet_client = S3ParquetClient()
-        response = s3_parquet_client.read(path=f"s3://test-bucket/aggregated/mobile_data.parquet/id_key={id_key}")
+        response = s3_parquet_client.read(
+            path=f"s3://test-bucket/aggregated/mobile_data.parquet/id_key={id_key}"
+        )
 
         return response
 
-    elif request.method == 'GET':
+    elif request.method == "GET":
 
         id_key = request.args.get("id_key")
         s3_parquet_client = S3ParquetClient()
-        response = s3_parquet_client.read(path=f"s3://test-bucket/aggregated/mobile_data.parquet/id_key={id_key}")
+        response = s3_parquet_client.read(
+            path=f"s3://test-bucket/aggregated/mobile_data.parquet/id_key={id_key}"
+        )
         return response
 
     else:
         return {"ERROR": f"Bad request method: {request.method}"}
 
 
-@app.route('/api/read_data/ddb', methods=['GET', 'POST'])
+@app.route("/api/read_data/ddb", methods=["GET", "POST"])
 def read_data():
     """
     :return: json
     """
 
-    if request.method == 'POST':
+    if request.method == "POST":
         user_id = request.args.get("user_id")
         password = request.args.get("password")
 
@@ -92,7 +97,7 @@ def read_data():
         response = dynamodb_client.get_item({"user_id": user_id})
         return response
 
-    elif request.method == 'GET':
+    elif request.method == "GET":
 
         user_id = request.args.get("user_id")
         # read

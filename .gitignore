@@ -292,4 +292,12 @@ spark-warehouse/
 *src
 clients/*
 
+# Env
+.env
+.env.api
+.env.docker-images
+!.env.example.docker-images
+!.env.api.example
+!.env.example
+
 # End of https://www.gitignore.io/api/spark,python,pycharm

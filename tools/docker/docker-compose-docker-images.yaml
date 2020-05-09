@@ -1,0 +1,51 @@
+version: '3.7'
+services:
+
+  # python_base dockerfile
+  python_base:
+    build:
+      context: ../../
+      dockerfile: tools/docker/docker_images/Dockerfile.python_base
+    # enables so that we can see logs in real time not having to run log command if we don't want to
+    tty: true
+    env_file:
+      - .env.docker-images
+    networks:
+      - docker_images
+
+  # python_spark_hadoop_base dockerfile
+  python_spark_hadoop_base:
+    build:
+      context: ../../
+      dockerfile: tools/docker/docker_images/Dockerfile.python_spark_hadoop_base
+    tty: true
+    links:
+      - python_base
+    depends_on:
+      - python_base
+    env_file:
+      - .env.docker-images
+    networks:
+      - docker_images
+
+  # test dockerfile
+  test_base:
+    build:
+      context: ../../
+      dockerfile: tools/docker/docker_images/Dockerfile.test_base
+    tty: true
+    volumes:
+      - ../../tests:/tests
+    links:
+      - python_base
+      - python_spark_hadoop_base
+    depends_on:
+      - python_spark_hadoop_base
+      - python_base
+    env_file:
+      - .env.docker-images
+    networks:
+      - docker_images
+
+networks:
+  docker_images:

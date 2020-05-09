@@ -1,5 +1,7 @@
-FROM debian:stretch AS python_base
+FROM debian:stretch
 MAINTAINER Getty Images "https://github.com/gettyimages"
+
+COPY Pipfile Pipfile.lock /
 
 RUN apt-get update \
  && apt-get install -y locales \
@@ -46,11 +48,8 @@ ENV PYSPARK_PYTHON=python3.7
 ENV PYSPARK_DRIVER_PYTHON=python3.7
 RUN echo '\nalias python=python3.7' >> ~/.bashrc
 
+RUN apt-get --yes install python-distutils-extra && apt-get install --yes git
 RUN python3.7 -m pip install --upgrade --force pip
 
-RUN apt-get --yes install python-distutils-extra
-RUN pip install pypandoc
-RUN pip install setuptools
-
-COPY requirements.txt .
-RUN pip install -r requirements.txt
+RUN pip install pipenv
+RUN pipenv sync --dev --python 3.7

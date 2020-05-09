@@ -1,0 +1,13 @@
+FROM docker_python_spark_hadoop_base
+
+# GIT
+RUN apt-get update && apt-get install -y git
+
+# Pipfile
+COPY Pipfile Pipfile.lock /
+
+# pipenv
+RUN pip install pipenv
+RUN pipenv sync --dev --python 3.7
+
+CMD ["pipenv", "run", "python"]
