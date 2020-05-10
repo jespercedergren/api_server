@@ -1,34 +1,6 @@
 version: '3.2'
 
 services:
- logstash:
-   build: ./logstash
-   volumes:
-   - type: bind
-     source: ./logstash/pipeline
-     target: /usr/share/logstash/pipeline
-   - type: bind
-     source: ./logstash/config/pipelines.yml
-     target: /usr/share/logstash/config/pipelines.yml
-   ports:
-    - "8081:8081"
-    - "8082:8082"
-    - "8083:8083"
-   networks:
-    - api_default
-
- mongo:
-  image: mongo
-  environment:
-    - MONGO_INITDB_ROOT_USERNAME=test
-    - MONGO_INITDB_ROOT_PASSWORD=test
-  ports:
-    - "27017:27017"
-    - "27018:27018"
-    - "27019:27019"
-  networks:
-    - api_default
-
  localstack:
     image: localstack/localstack
     environment:

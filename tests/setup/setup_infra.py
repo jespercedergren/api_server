@@ -1,10 +1,7 @@
 import json
-
 import boto3
-from clients.mongo import get_client_arg_from_secrets
 
-from tests.config import dynamodb_config, localstack_config, minio_config, mongo_config
-from tests.setup.mongo import MongoDBSetup
+from tests.config import dynamodb_config, localstack_config, minio_config
 
 
 def setup_secrets_localstack():
@@ -89,29 +86,9 @@ def setup_s3_bucket_minio():
             print(f"Bucket {bucket_name} already exists...")
 
 
-def mongo_db_setup():
-    """
-    Create a database setup class and return
-    :return:
-    """
-
-    print("Setting up mongo")
-
-    client_arg = get_client_arg_from_secrets(mongo_config["secrets"])
-
-    # DataBaseSetup class can handle database state, i.e. post data, reset data etc
-    db_instance = MongoDBSetup(client_arg)
-    return db_instance
-
-
-def clean_mongo_database(mongo_db_setup):
-    mongo_db_setup.reset_db()
-
-
 if __name__ == "__main__":
     setup_secrets_localstack()
     setup_s3_bucket_localstack()
     setup_s3_bucket_minio()
     setup_firehose_delivery_stream_localstack()
     setup_table_dynamodb()
-    clean_mongo_database(mongo_db_setup())

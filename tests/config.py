@@ -5,10 +5,7 @@ if test_env == "docker":
     endpoint_url_localstack = "http://localstack:4566"
     endpoint_url_localstack_spark_s3 = "http://localstack:4572"
     endpoint_url_dynamodb = "http://dynamodb:8000"
-    host_postgres = "postgres"
-    host_mongo = "mongo"
     server_service = "server"
-    logstash_service = "logstash"
 
 
 elif test_env == "local" or test_env == "circle":
@@ -16,10 +13,7 @@ elif test_env == "local" or test_env == "circle":
     endpoint_url_localstack = "http://localhost:4566"
     endpoint_url_localstack_spark_s3 = "http://127.0.0.1:4572"
     endpoint_url_dynamodb = "http://localhost:8001"
-    host_postgres = "localhost"
-    host_mongo = "localhost"
     server_service = "0.0.0.0"
-    logstash_service = "0.0.0.0"
 
 
 credential_minio = "testtest"
@@ -110,18 +104,4 @@ dynamodb_config = {
         "KeySchema": [{"AttributeName": "user_id", "KeyType": "HASH"}],
         "ProvisionedThroughput": {"ReadCapacityUnits": 10, "WriteCapacityUnits": 10},
     },
-}
-
-postgres_config = {
-    "secrets": {
-        "host": host_postgres,
-        "dbname": "test",
-        "user": "test",
-        "password": "test",
-        "port": "54320",
-    }
-}
-
-mongo_config = {
-    "secrets": {"host": host_mongo, "user": "test", "password": "test", "port": "27017"}
 }
