@@ -5,13 +5,10 @@ import json
 import logging
 from pyspark.sql import SparkSession
 
-from tests.config import minio_config, localstack_config, dynamodb_config, mongo_config, postgres_config
-from tests.setup.postgres import PostgresSetup
-from tests.setup.mongo import MongoDBSetup
+from tests.config import minio_config, localstack_config, dynamodb_config
 from tests.helpers.infra import cleanup_buckets
 from tests.helpers.infra import cleanup_secrets
 from tests.helpers.infra import cleanup_delivery_streams
-from clients.mongo import get_client_arg_from_secrets
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -180,45 +177,3 @@ def spark_session_minio():
     logging.info('Delete Spark session...')
     spark.stop()
     del spark
-
-
-@pytest.fixture(scope="module")
-def mongo_db_setup():
-    """
-    Create a database setup class and return
-    :return:
-    """
-
-    client_arg = get_client_arg_from_secrets(mongo_config["secrets"])
-
-    # DataBaseSetup class can handle database state, i.e. post data, reset data etc
-    db_instance = MongoDBSetup(client_arg)
-    yield db_instance
-
-
-@pytest.fixture
-def clean_mongo_database(mongo_db_setup):
-    mongo_db_setup.reset_db()
-    return mongo_db_setup
-
-
-@pytest.fixture(scope="module")
-def postgres_setup():
-    """
-    Create a database setup class and return
-    :return:
-    """
-
-    # DataBaseSetup class can handle database state, i.e. post data, reset data etc
-    db_instance = PostgresSetup(**postgres_config["secrets"])
-    yield db_instance
-
-    # Clean up
-    db_instance.close_connection()
-    del db_instance
-
-
-@pytest.fixture
-def clean_postgres_database(postgres_setup):
-    postgres_setup.setup_tables()
-    return postgres_setup

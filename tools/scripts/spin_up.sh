@@ -15,9 +15,6 @@ echo "minio:9000 is open"
 ./tools/scripts/wait_for_it.sh localhost:8000 -t 0
 echo "dynamodb:8000 is open"
 
-./tools/scripts/wait_for_it.sh localhost:27017 -t 0
-echo "mongo:27017 is open"
-
 
 echo "just a minute, waiting for all services..."
 sleep 60
